@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cx } from "@/utils/all";
-import { urlForImage } from "@/lib/sanity/image";
 import { parseISO, format } from "date-fns";
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import CategoryLabel from "@/components/blog/category";
@@ -15,12 +14,9 @@ export default function PostList({
   fontSize,
   fontWeight
 }) {
-  const imageProps = post?.mainImage
-    ? urlForImage(post.mainImage)
-    : null;
-  const AuthorimageProps = post?.author?.image
-    ? urlForImage(post.author.image)
-    : null;
+  const imageProps = post.urlToImage;
+  const AuthorimageProps =
+    "https://icon-library.com/images/default-profile-icon/default-profile-icon-24.jpg";
   return (
     <>
       <div
@@ -41,17 +37,15 @@ export default function PostList({
                 ? "aspect-[5/4]"
                 : "aspect-square"
             )}
-            href={`/post/${pathPrefix ? `${pathPrefix}/` : ""}${
-              post.slug.current
-            }`}>
+            href={`${post.url}`}>
             {imageProps ? (
               <Image
-                src={imageProps.src}
-                {...(post.mainImage.blurDataURL && {
-                  placeholder: "blur",
-                  blurDataURL: post.mainImage.blurDataURL
-                })}
-                alt={post.mainImage.alt || "Thumbnail"}
+                src={imageProps}
+                // {...(post.mainImage.blurDataURL && {
+                //   placeholder: "blur",
+                //   blurDataURL: post.mainImage.blurDataURL
+                // })}
+                alt={"Thumbnail"}
                 priority={preloadImage ? true : false}
                 className="object-cover transition-all"
                 fill
@@ -67,10 +61,7 @@ export default function PostList({
 
         <div className={cx(minimal && "flex items-center")}>
           <div>
-            <CategoryLabel
-              categories={post.categories}
-              nomargin={minimal}
-            />
+            <CategoryLabel category="positive" nomargin={minimal} />
             <h2
               className={cx(
                 fontSize === "large"
@@ -83,10 +74,7 @@ export default function PostList({
                   : "font-semibold leading-snug tracking-tight",
                 "mt-2    dark:text-white"
               )}>
-              <Link
-                href={`/post/${pathPrefix ? `${pathPrefix}/` : ""}${
-                  post.slug.current
-                }`}>
+              <Link href={`${post.url}`}>
                 <span
                   className="bg-gradient-to-r from-green-200 to-green-100 bg-[length:0px_10px] bg-left-bottom
       bg-no-repeat
@@ -103,27 +91,21 @@ export default function PostList({
             <div className="hidden">
               {post.excerpt && (
                 <p className="mt-2 line-clamp-3 text-sm text-gray-500 dark:text-gray-400">
-                  <Link
-                    href={`/post/${
-                      pathPrefix ? `${pathPrefix}/` : ""
-                    }${post.slug.current}`}
-                    legacyBehavior>
-                    {post.excerpt}
+                  <Link href={`${post.url}`} legacyBehavior>
+                    {post.description}
                   </Link>
                 </p>
               )}
             </div>
 
             <div className="mt-3 flex items-center space-x-3 text-gray-500 dark:text-gray-400">
-              <Link
-                href={`/author/${post.author.slug.current}`}
-                legacyBehavior>
+              <Link href={`/author/#`} legacyBehavior>
                 <div className="flex items-center gap-3">
                   <div className="relative h-5 w-5 flex-shrink-0">
                     {post.author.image && (
                       <Image
-                        src={AuthorimageProps.src}
-                        alt={post?.author?.name}
+                        src={AuthorimageProps}
+                        alt={post.author}
                         className="rounded-full object-cover"
                         fill
                         sizes="20px"
@@ -131,7 +113,7 @@ export default function PostList({
                     )}
                   </div>
                   <span className="truncate text-sm">
-                    {post.author.name}
+                    {post.author}
                   </span>
                 </div>
               </Link>
@@ -140,11 +122,8 @@ export default function PostList({
               </span>
               <time
                 className="truncate text-sm"
-                dateTime={post?.publishedAt || post._createdAt}>
-                {format(
-                  parseISO(post?.publishedAt || post._createdAt),
-                  "MMMM dd, yyyy"
-                )}
+                dateTime={post?.publishedAt}>
+                {format(parseISO(post?.publishedAt), "MMMM dd, yyyy")}
               </time>
             </div>
           </div>
